@@ -103,7 +103,7 @@ distância (cm) = duração × 0.034 / 2
 
 ## 🔗 Simulação
 
-Acesse o circuito no Tinkercad: *[inserir link]*
+Acesse o circuito no Tinkercad: *[https://www.tinkercad.com/things/1TsCtWn69Tt-tiumidae]*
 
 ---
 
