@@ -17,7 +17,6 @@ O projeto foi desenvolvido como trabalho acadêmico do curso de **Ciência da Co
 
 | Nome |
 |------|
-| Erick Gabriel Chiaradia Kalil e Silva |
 | Gabriela Schaper Soriano Veiga |
 | Lucas Manata de Pinho |
 | Matheus Romling Rotheia Almeida |
