@@ -37,7 +37,6 @@ long readUltrasonicDistance(int triggerPin, int echoPin)
   delayMicroseconds(10);
   digitalWrite(triggerPin, LOW);
 
-//evitar travar
   return pulseIn(echoPin, HIGH, 30000); 
 }
 
