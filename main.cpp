@@ -1,4 +1,4 @@
-//pinos
+// ===== PINOS =====
 const int buzzer = 7;
 const int luzVermelha = 11;
 const int luzAzul = 9;
@@ -8,26 +8,27 @@ const int triggerPin = 4;
 const int echoPin = 5;
 const int sensorUmidade = A0;
 
-//variaveis globais
+// ===== VARIÁVEIS =====
 int valorUmidade = 0;
 unsigned long tempoInicial = 0;
 unsigned long tempoFinal = 0;
 bool contando = false;
-bool alarmeAtivo = false;
 
-//contador
+// ===== CONTADOR DE CLIQUES =====
 int contador = 0;
 int estadoAtual = HIGH;
 int estadoAnterior = HIGH;
 
-//media movel
-const int numLeituras = 20; 
+// ===== MÉDIA MÓVEL =====
+const int numLeituras = 10;
 int leituras[numLeituras];
 int indice = 0;
 long soma = 0;
 int mediaUmidade = 0;
 
-//sensor ultrasonic
+// ======================================================
+// SENSOR ULTRASSÔNICO
+// ======================================================
 long readUltrasonicDistance(int triggerPin, int echoPin)
 {
   digitalWrite(triggerPin, LOW);
@@ -37,40 +38,63 @@ long readUltrasonicDistance(int triggerPin, int echoPin)
   delayMicroseconds(10);
   digitalWrite(triggerPin, LOW);
 
-  return pulseIn(echoPin, HIGH, 30000); 
+  return pulseIn(echoPin, HIGH);
 }
 
-//testes
+// ======================================================
+// RESET DO SISTEMA (NÃO DESLIGA O CONTADOR)
+// ======================================================
+void resetSistema()
+{
+  Serial.println("\n=== RESET DO SISTEMA ===");
+
+  tempoInicial = 0;
+  tempoFinal = 0;
+  contando = false;
+
+  soma = 0;
+  indice = 0;
+  valorUmidade = 0;
+  mediaUmidade = 0;
+
+  for (int i = 0; i < numLeituras; i++)
+  {
+    leituras[i] = 0;
+  }
+
+  digitalWrite(luzVermelha, LOW);
+  digitalWrite(luzVerde, LOW);
+  digitalWrite(luzAzul, LOW);
+  digitalWrite(buzzer, LOW);
+
+  Serial.println("Sistema reiniciado!\n");
+}
+
+// ======================================================
+// ROTINA DE TESTE
+// ======================================================
 void rotinaTeste()
 {
   Serial.println("\n=== INICIANDO TESTE ===");
+
   Serial.print("Botao: ");
   Serial.println(digitalRead(botao));
+
   Serial.print("Umidade: ");
   Serial.println(analogRead(sensorUmidade));
 
-  Serial.println("Testando LEDs...");
-  digitalWrite(luzVermelha, HIGH);
-  delay(1000);
-  digitalWrite(luzVermelha, LOW);
+  digitalWrite(luzVermelha, HIGH); delay(1000); digitalWrite(luzVermelha, LOW);
+  digitalWrite(luzVerde, HIGH); delay(1000); digitalWrite(luzVerde, LOW);
+  digitalWrite(luzAzul, HIGH); delay(1000); digitalWrite(luzAzul, LOW);
 
-  digitalWrite(luzVerde, HIGH);
-  delay(1000);
-  digitalWrite(luzVerde, LOW);
-
-  digitalWrite(luzAzul, HIGH);
-  delay(1000);
-  digitalWrite(luzAzul, LOW);
-
-  Serial.println("Testando buzzer...");
-  digitalWrite(buzzer, HIGH);
-  delay(1000);
-  digitalWrite(buzzer, LOW);
+  digitalWrite(buzzer, HIGH); delay(1000); digitalWrite(buzzer, LOW);
 
   Serial.println("=== TESTE FINALIZADO ===\n");
 }
 
-//void setup
+// ======================================================
+// SETUP
+// ======================================================
 void setup()
 {
   pinMode(luzVermelha, OUTPUT);
@@ -85,76 +109,50 @@ void setup()
 
   Serial.begin(9600);
 
-  //iniciar media movel
-  for (int i=0; i<numLeituras; i++)
-  {
+  for (int i = 0; i < numLeituras; i++)
     leituras[i] = 0;
-  }
 
-  //led e buzzer desligado
   digitalWrite(luzVermelha, LOW);
   digitalWrite(luzVerde, LOW);
   digitalWrite(luzAzul, LOW);
   digitalWrite(buzzer, LOW);
-
-  //calibração inicial
-  long duracao = readUltrasonicDistance(triggerPin, echoPin);
-  float distanciaCm = duracao * 0.034 / 2.0;
-
-  Serial.print("Distancia inicial: ");
-  Serial.print(distanciaCm);
-  Serial.println(" cm");
 }
 
-//void loop
+// ======================================================
+// LOOP
+// ======================================================
 void loop()
 {
-  //serial read da vida
+  // ===== SERIAL =====
   if (Serial.available() > 0)
   {
     char comando = Serial.read();
-    if (comando == 't')
-    {
-      rotinaTeste();
-    }
+    if (comando == 't') rotinaTeste();
   }
 
-  //contador de cliques
+  // ===== BOTÃO (TOGGLE + RESET) =====
   estadoAtual = digitalRead(botao);
 
   if (estadoAnterior == HIGH && estadoAtual == LOW)
   {
     contador++;
-    Serial.print("Numero de cliques: ");
+
+    Serial.print("Cliques: ");
     Serial.println(contador);
 
     if (contador % 2 != 0)
-    {
       Serial.println("Sistema ATIVADO");
-    }
     else
-    {
       Serial.println("Sistema DESATIVADO");
-    }
-    delay(50); // debounce simples
+
+    resetSistema();  // <<< AQUI ESTÁ O RESET ADICIONADO
+
+    delay(50);
   }
+
   estadoAnterior = estadoAtual;
 
-  //media movel da unidade
-  soma -= leituras[indice];
-  leituras[indice] = analogRead(sensorUmidade);
-  soma += leituras[indice];
-  indice++;
-
-  if (indice >= numLeituras)
-  {
-    indice = 0;
-  }
-
-  mediaUmidade = soma / numLeituras;
-  valorUmidade = mediaUmidade;
-
-  //sistema desligado
+  // ===== SISTEMA DESLIGADO =====
   if (contador % 2 == 0)
   {
     digitalWrite(buzzer, LOW);
@@ -162,92 +160,79 @@ void loop()
     digitalWrite(luzVerde, LOW);
     digitalWrite(luzAzul, LOW);
     contando = false;
-    alarmeAtivo = false;
-    delay(100); 
     return;
   }
 
-  //sistema ligado
-  if (valorUmidade <= 420)
+  // ===== MÉDIA MÓVEL =====
+  soma -= leituras[indice];
+  leituras[indice] = analogRead(sensorUmidade);
+  soma += leituras[indice];
+
+  indice++;
+  if (indice >= numLeituras) indice = 0;
+
+  mediaUmidade = soma / numLeituras;
+  valorUmidade = mediaUmidade;
+
+  // ===== UMIDADE BAIXA =====
+  if (valorUmidade <= 0)
   {
     digitalWrite(buzzer, LOW);
+    digitalWrite(luzVerde, HIGH);
     digitalWrite(luzVermelha, LOW);
-    digitalWrite(luzVerde, HIGH); // Verde indica tudo OK
     digitalWrite(luzAzul, LOW);
-    
-    contando = false;
-    alarmeAtivo = false;
-    
-    delay(100);
     return;
   }
 
-  //leitura sensor ultrasonic
+  // ===== ULTRASSÔNICO =====
   long duracao = readUltrasonicDistance(triggerPin, echoPin);
   float distanciaCm = duracao * 0.034 / 2.0;
+  
+  if(distanciaCm > 40){
+    contando = false;
 
-  if (distanciaCm == 0) {
-    delay(100);
-    return;
-  }
-
-  if (distanciaCm > 40)
-  {
     digitalWrite(buzzer, LOW);
     digitalWrite(luzVermelha, LOW);
     digitalWrite(luzVerde, LOW);
-    digitalWrite(luzAzul, HIGH);
-    
-    contando = false;
-    alarmeAtivo = false;
+    digitalWrite(luzAzul, LOW);
   }
- 
-  else if (distanciaCm <= 40 && distanciaCm > 30 && !contando)
+
+  if (distanciaCm <= 40 && distanciaCm > 30 && !contando)
   {
     tempoInicial = millis();
     contando = true;
 
-    digitalWrite(buzzer, LOW);
-    digitalWrite(luzVerde, LOW);
+    digitalWrite(luzVerde, HIGH);
     digitalWrite(luzVermelha, LOW);
-    digitalWrite(luzAzul, HIGH);
+    digitalWrite(luzAzul, LOW);
 
     Serial.println("Monitorando subida da agua...");
   }
-  else if (distanciaCm <= 30 && !alarmeAtivo)
+
+  if (distanciaCm <= 30 && contando)
   {
     tempoFinal = millis();
-    alarmeAtivo = true;
+    contando = false;
 
     digitalWrite(buzzer, HIGH);
     digitalWrite(luzVermelha, HIGH);
     digitalWrite(luzVerde, LOW);
     digitalWrite(luzAzul, LOW);
 
-    if (contando) {
-        float tempoSegundos = (tempoFinal - tempoInicial) / 1000.0;
-        contando = false;
+    float tempoSegundos = (tempoFinal - tempoInicial) / 1000.0;
 
-        if (tempoSegundos > 0)
-        {
-          float velocidadeCms = 10.0 / tempoSegundos;
-          float velocidadeCmm = velocidadeCms * 60.0;
+    if (tempoSegundos > 0)
+    {
+      float velocidadeCms = 10.0 / tempoSegundos;
+      float velocidadeCmm = velocidadeCms * 60.0;
 
-          //caso nao esteja tao grave
-          Serial.println("\n=== ALERTA DE ENCHENTE ===");
-          Serial.print("Umidade: ");
-          Serial.println(valorUmidade);
-          Serial.print("Velocidade da subida da agua: ");
-          Serial.print(velocidadeCmm);
-          Serial.println(" cm/min");
-          
-        }
-    } else {
-        //caso esteja grave
-        Serial.println("\n=== ALERTA DE ENCHENTE IMEDIATO ===");
-        Serial.print("Umidade: ");
-        Serial.println(valorUmidade);
+      Serial.println("\n=== ALERTA DE ENCHENTE ===");
+      Serial.print("Umidade: ");
+      Serial.println(valorUmidade);
+      Serial.print("Velocidade: ");
+      Serial.print(velocidadeCmm);
+      Serial.println(" cm/min");
+      delay(15000);
     }
   }
-  delay(100);
 }
