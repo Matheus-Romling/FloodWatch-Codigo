@@ -22,7 +22,11 @@ O projeto foi desenvolvido como trabalho acadêmico do curso de **Ciência da Co
 | Matheus Romling Rotheia Almeida |
 | Miguel Saraiva Ferreira |
 
+
+
 **Professores:** Cristiano Neves Rodrigues · Ilo Amy Saldanha Rivero · Mariana de Oliveira Santos Silva
+
+
 
 ---
 
