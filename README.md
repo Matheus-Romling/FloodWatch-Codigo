@@ -133,4 +133,12 @@ Acesse o circuito no Tinkercad: *[https://www.tinkercad.com/things/1TsCtWn69Tt-t
 ---
 
 ## Video Demonstrativo
-- https://youtu.be/lzx1_zlPERs
+
+- https://www.youtube.com/watch?v=lzx1_zlPERs&t=3s
+
+---
+
+## Apresentação
+
+- https://canva.link/ii7501y5lucromx
+  
