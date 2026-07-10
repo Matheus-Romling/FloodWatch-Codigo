@@ -135,6 +135,7 @@ Acesse o circuito no Tinkercad: *[https://www.tinkercad.com/things/1TsCtWn69Tt-t
 ## Video Demonstrativo
 
 - https://www.youtube.com/watch?v=lzx1_zlPERs&t=3s
+- DOWNLOAD: https://drive.google.com/file/d/11oZphzVWlZ6MJIA7HCB2nCU4MpU62sao/view?usp=sharing
 
 ---
 
